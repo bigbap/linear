@@ -1,8 +1,41 @@
 use std::{ops, usize};
-use super::errors::MatrixError;
 
-pub trait Identity<T> {
-    fn identity() -> Result<T, MatrixError>;
+use super::{
+    errors::MatrixError,
+    functions::*
+};
+
+pub trait TransformationMatrices<const R: usize, const C: usize> {
+    fn identity() -> Result<Matrix<R, C>, MatrixError> {
+        let vector = Vector::<R>::new(vec![1.0; R])?;
+
+        Self::scaling_matrix(vector)
+    }
+    fn scaling_matrix(vector: Vector<R>) -> Result<Matrix<R, C>, MatrixError> {
+        let mut data = Vec::<f32>::new();
+
+        for row in 0..R {
+            for col in 0..C {
+                data.push(match row == col {
+                    true => vector.get(row, 0)?,
+                    _ => 0.0
+                });
+            }
+        }
+
+        Matrix::<R, C>::new(data)
+    }
+    fn translation_matrix(vector: Vector<R>) -> Result<Matrix<R, C>, MatrixError> {
+        let mut matrix = Self::identity()?;
+        
+        for row in 0..R {
+            let index = (row * C) + C - 1;
+
+            matrix.data[index] = vector.get(row, 0)?;
+        }
+
+        Ok(matrix)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -13,35 +46,11 @@ pub struct Matrix<const R: usize, const C: usize> {
 }
 
 pub type Matrix2 = Matrix::<2, 2>;
-impl Identity<Matrix2> for Matrix2 {
-    fn identity() -> Result<Matrix2, MatrixError> {
-        Matrix2::new(vec![
-            1.0, 0.0,
-            0.0, 1.0
-        ])
-    }
-}
 pub type Matrix3 = Matrix::<3, 3>;
-impl Identity<Matrix3> for Matrix3 {
-    fn identity() -> Result<Matrix3, MatrixError> {
-        Matrix3::new(vec![
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0
-        ])
-    }
-}
 pub type Matrix4 = Matrix::<4, 4>;
-impl Identity<Matrix4> for Matrix4 {
-    fn identity() -> Result<Matrix4, MatrixError> {
-        Matrix4::new(vec![
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        ])
-    }
-}
+impl TransformationMatrices<2, 2> for Matrix2 {}
+impl TransformationMatrices<3, 3> for Matrix3 {}
+impl TransformationMatrices<4, 4> for Matrix4 {}
 
 pub type Vector<const R: usize> = Matrix::<R, 1>;
 pub type Vector2 = Matrix::<2, 1>;
@@ -114,7 +123,16 @@ impl<const R: usize, const C: usize> ops::Sub<Matrix<R, C>> for Matrix<R, C> {
     }
 }
 
-impl<const R: usize, const C: usize> ops::Mul<f32> for Matrix<R, C> {
+// dot product
+impl<const A: usize, const B: usize, const C: usize> ops::Mul<&Matrix<B, C>> for &Matrix<A, B> {
+    type Output = Matrix<A, C>;
+    
+    fn mul(self, rhs: &Matrix<B, C>) -> Self::Output {
+        dot(self, rhs).unwrap()
+    }
+}
+
+impl<const R: usize, const C: usize> ops::Mul<f32> for &Matrix<R, C> {
     type Output = Matrix<R, C>;
 
     fn mul(self, rhs: f32) -> Self::Output {

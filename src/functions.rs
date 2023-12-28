@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use super::{
     matrix::*,
     errors::MatrixError
@@ -80,4 +82,14 @@ pub fn vector_cross(lhs: &Vector3, rhs: &Vector3) -> Result<Vector3, MatrixError
         (a[2] * b[0]) - (a[0] * b[2]),
         (a[0] * b[1]) - (a[1] * b[0])
     ])
+}
+
+// trig functions
+
+pub fn deg_to_rad(deg: f32) -> f32 {
+    deg * (PI / 180.0)
+}
+
+pub fn rad_to_deg(rad: f32) -> f32 {
+    rad * (180.0 / PI)
 }

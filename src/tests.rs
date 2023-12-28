@@ -76,7 +76,7 @@ fn vector_transpose() {
 }
 
 #[test]
-fn should_add_matrices() {
+fn matrix_addition() {
     let m1 = Matrix2::new(vec![
         2.1, 3.4,
         6.5, 1.2
@@ -93,7 +93,7 @@ fn should_add_matrices() {
 }
 
 #[test]
-fn should_subtract_matrices() {
+fn matrix_subtraction() {
     let m1 = Matrix2::new(vec![
         2.0, 3.0,
         6.0, 1.0
@@ -110,7 +110,7 @@ fn should_subtract_matrices() {
 }
 
 #[test]
-fn should_multiply_by_scaler() {
+fn matrix_multiplied_by_scaler() {
     let m1 = Matrix2::new(vec![
         2.0, 3.0,
         6.0, 1.0
@@ -120,13 +120,13 @@ fn should_multiply_by_scaler() {
         12.0, 2.0
     ]).unwrap();
 
-    let result = m1 * 2.0;
+    let result = &m1 * 2.0;
 
     assert_eq!(result, m2);
 }
 
 #[test]
-fn should_perform_dot_product_on_matrices() {
+fn matrix_dot_product() {
     let m1 = Matrix2::new(vec![
         2.0, 3.0,
         6.0, 1.0
@@ -140,7 +140,7 @@ fn should_perform_dot_product_on_matrices() {
         19.0, 15.0, 32.0
     ]).unwrap();
 
-    let result = dot(&m1, &m2).unwrap();
+    let result = &m1 * &m2;
 
     assert_eq!(result, m3);
 }
